@@ -1,6 +1,6 @@
 ---
 title:  "A Lazy Hack for Synchronous Popups in GTK"
-date: 2026-05-08
+date: 2026-05-10
 mathjax: false
 layout: post
 categories: media
@@ -8,8 +8,6 @@ tags: [win32, gtk, c, ui]
 ---
 
 If you've ever worked across both Win32 and GTK, you would know they don't always agree on how things should work. This is one of those moments.
-
----
 
 ## The Problem
 
@@ -21,8 +19,6 @@ GTK doesn't work that way. `gtk_menu_popup_at_pointer` fires and returns
 immediately — the menu appears asynchronously and your code keeps running. If
 you're porting something from Win32, or just want that same "block until done"
 behaviour, GTK gives you nothing out of the box.
-
----
 
 ## The Hack
 
@@ -66,8 +62,6 @@ return.
 To the caller, this function looks and feels synchronous — exactly like
 `TrackPopupMenu`.
 
----
-
 ## Why `volatile`?
 
 The `volatile` keyword here is doing real work, not just decoration. Without it,
@@ -75,7 +69,5 @@ the compiler might see a bool that never changes within the loop body and optimi
 the check away entirely — effectively turning the while loop into an infinite loop
 or eliminating it. `volatile` tells the compiler: *don't cache this, check it
 every time, it can change from somewhere you're not tracking.*
-
----
 
 *Is It Pretty? No. Does It Work? Yes.*
