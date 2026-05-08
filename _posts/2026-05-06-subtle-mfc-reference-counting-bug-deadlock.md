@@ -121,3 +121,7 @@ The PNG migration was the trigger, not the cause. The cause was a subtle API con
 **Fix the source, not the symptom**. No more slapping `if (ptr != NULL)` and calling it done. Maybe I'll talk about that in a separate post.
 
 _Takeaways? Some things should be left as an exercise to the reader._
+
+**Refrences:**
+1. [Another reason not to do anything scary in your DllMain: Inadvertent deadlock by Raymond Chen](https://devblogs.microsoft.com/oldnewthing/20040128-00/?p=40853)
+2. [The case of the hung Explorer window by Raymond Chen](https://devblogs.microsoft.com/oldnewthing/20160805-00/?p=94035)
