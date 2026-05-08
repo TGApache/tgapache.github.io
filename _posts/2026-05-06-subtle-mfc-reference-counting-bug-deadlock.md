@@ -7,7 +7,7 @@ categories: media
 tags: [cpp, mfc, legacy, bug, deadlock]
 ---
 
-A hang is worse than a crash. There's no stack trace – just a live process that stops doing anything useful. Our application hung randomly after some period of time or user action. Developers spent half a week on it with no resolution. As the deadline approached, I was asked to take a separate look, and this is what I found.
+A hang is worse than a crash. Just a live process that stops doing anything useful. Our application hung randomly after some period of time or user action. Developers spent half a week on it with no resolution. As the deadline approached, I was asked to take a separate look, and this is what I found.
 
 ## Some Background: MFC, DLLs, and Reference Counting
 
