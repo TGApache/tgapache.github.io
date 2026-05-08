@@ -11,7 +11,7 @@ A hang is worse than a crash. There's no stack trace – just a live process tha
 
 ## Some Background: MFC, DLLs, and Reference Counting
 
-The application was built on MFC (Microsoft Foundation Classes) and structured
+The application was built on MFC and structured
 across multiple DLLs, some of which contained objects derived from `CWinApp` –
 MFC's core application class. When you use MFC as a shared DLL, there's a rule
 that matters enormously and is easy to miss: if you override `CWinApp::InitInstance()`
@@ -21,9 +21,7 @@ tracks how many modules are actively using its global state. Every call to
 `ExitInstance()` decrements it. When the count hits zero, MFC tears down its
 globals.
 
-Some of our legacy DLLs were not calling `super::InitInstance()` on load.
-
-They *were* calling `super::ExitInstance()` on unload.
+Some of our legacy DLLs were not calling `super::InitInstance()` on load. They *were* calling `super::ExitInstance()` on unload.
 
 So every time one of these DLLs unloaded, the reference count decremented – but
 it had never been incremented in the first place. Eventually the count hit zero
