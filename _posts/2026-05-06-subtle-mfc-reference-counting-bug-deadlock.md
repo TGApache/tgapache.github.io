@@ -7,12 +7,12 @@ categories: media
 tags: [cpp, mfc, legacy, bug, deadlock]
 ---
 
-A hang is worse than a crash. There's no stack trace — just a live process that stops doing anything useful. Our application hung randomly after some period of time or user action. Six developers spent a week on it with no resolution. As the deadline approached, I was asked to take a separate look and this is what I found.
+A hang is worse than a crash. There's no stack trace – just a live process that stops doing anything useful. Our application hung randomly after some period of time or user action. Developers spent half a week on it with no resolution. As the deadline approached, I was asked to take a separate look, and this is what I found.
 
 ## Some Background: MFC, DLLs, and Reference Counting
 
 The application was built on MFC (Microsoft Foundation Classes) and structured
-across multiple DLLs, some of which contained objects derived from `CWinApp` —
+across multiple DLLs, some of which contained objects derived from `CWinApp` –
 MFC's core application class. When you use MFC as a shared DLL, there's a rule
 that matters enormously and is easy to miss: if you override `CWinApp::InitInstance()`
 in your DLL, you *must* call the parent's `InitInstance()`. This is how MFC
@@ -25,10 +25,10 @@ Some of our legacy DLLs were not calling `super::InitInstance()` on load.
 
 They *were* calling `super::ExitInstance()` on unload.
 
-So every time one of these DLLs unloaded, the reference count decremented — but
+So every time one of these DLLs unloaded, the reference count decremented – but
 it had never been incremented in the first place. Eventually the count hit zero
 prematurely. MFC decided it was time to clean up. Among the resources it cleaned
-up were GDI+ resources — specifically things like `CPngImage` and `CImage`,
+up were GDI+ resources – specifically things like `CPngImage` and `CImage`,
 which we had recently started using for PNG images in the ribbon bar.
 
 ## Why PNGs Changed Everything
@@ -44,7 +44,7 @@ happens.
 
 This matters because of what GDI+ does on shutdown. `GdiplusShutdown` signals
 that background worker thread and then *waits* for it to exit. The MSDN
-documentation is explicit about this — and it includes a warning that's easy to
+documentation is explicit about this – and it includes a warning that's easy to
 miss:
 
 > Do not call GdiplusStartup or GdiplusShutdown in DllMain or in any function
@@ -58,7 +58,7 @@ Here's the sequence that produced the hang:
 
 **1. A DLL unloads.**
 Windows calls `DllMain` with `DLL_PROCESS_DETACH`. This runs inside the Windows
-*loader lock* — a critical section that serialises all DLL load and unload
+*loader lock* – a critical section that serialises all DLL load and unload
 notifications. Nothing else related to DLL loading or unloading can happen while
 you're inside it.
 
@@ -69,7 +69,7 @@ zero. MFC begins tearing down its global state.
 
 **3. MFC invokes GDI+ shutdown.**
 As part of that teardown, `GdiplusShutdown` is called. This happens inside
-`DllMain` — inside the loader lock.
+`DllMain` – inside the loader lock.
 
 **4. GDI+ signals its background worker thread and waits.**
 `GdiplusShutdown` tells the background thread to exit, then blocks, waiting for
@@ -94,8 +94,8 @@ Main thread (in DllMain / loader lock)
                                 └─ (deadlock)
 ```
 
-It also explained why **Application-2** — a related product sharing much of the
-same codebase and the same broken `InitInstance`/`ExitInstance` mismatch — never
+It also explained why **Application-2** – a related product sharing much of the
+same codebase and the same broken `InitInstance`/`ExitInstance` mismatch – never
 exhibited the hang. Application-2 still used BMPs. No PNGs meant no GDI+
 background thread. The same premature cleanup happened, but since GDI+ shutdown
 was never invoked, there was nothing to deadlock against. The bug was latent,
@@ -108,7 +108,7 @@ That something was the PNG migration.
 Once the root cause was clear, the fix was straightforward. Every effected DLL that derived from `CWinApp` and overrode `InitInstance` needed to call
 `super::InitInstance()` at the top of its override, matching the `super::ExitInstance()`
 call it was already making on unload. This restored the reference count symmetry
-MFC expected and ensured its global teardown — including GDI+ shutdown — only
+MFC expected and ensured its global teardown – including GDI+ shutdown – only
 happened when it was actually safe to do so. One call per DLL. That's the entirety of the code change.
 
 ```cpp

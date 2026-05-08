@@ -10,7 +10,7 @@ tags: [python, refactoring, pipeline-pattern, tect-debt, fintech, backend]
 I've been working with a UAE-based fintech platform for a while now, and if
 there's one thing that quietly becomes a monster over time, it's fee calculation
 logic. It started as a simple function, a few conditions, maybe a discount here
-and there — and before you know it you've got a spaghetti function with deeply
+and there – and before you know it you've got a spaghetti function with deeply
 mingled logic, impossible to test or reuse without running the whole thing end
 to end.
 
@@ -19,10 +19,10 @@ That was us. That was our `calculate_payment_methods_fee`.
 ## The Problem
 
 The function *worked*. It calculated markups, discounts, service fees, taxes,
-priorities — all correctly. But it was completely opaque and difficult to dissect.
+priorities – all correctly. But it was completely opaque and difficult to dissect.
 
 The breaking point was when product started asking for variants. Payment links,
-invoices, collect campaigns, in-person payments, foreign currency flows — all
+invoices, collect campaigns, in-person payments, foreign currency flows – all
 subtly different, all sharing 80% of the same logic. Every new variant meant
 another fork of the monolith. It wasn't sustainable.
 
@@ -80,12 +80,12 @@ FeatureFeePipeline(context)
 That's the full fee calculation for a payment link. Readable top to bottom, no
 archaeology required.
 
-_You could implement this with plain functions — each step is just
+_You could implement this with plain functions – each step is just
 `(payload, context) -> payload`, nothing inherently object-oriented about it.
 Classes just made configuration cleaner and the pipeline more readable._
 
 _You'll also notice `MakeBackwardCompatible()` in there. The new pipeline
-produces a richer payload shape — but we had existing consumers in production
+produces a richer payload shape – but we had existing consumers in production
 already reading the old field names. Rather than a hard cutover, this step
 aliases the new fields back to what the old code expected. Incremental adoption.
 When we're ready to retire it, it's one line deleted from the declaration. Backward
@@ -95,7 +95,7 @@ compatibility as just another step in the list._
 
 Each pipeline step is a class. Composing a different pipeline means listing different steps.
 
-Take for example the charge pipeline. It stops before the cleanup phase to keep intermediate fields. Or the collect pipeline swaps `GetLinkPayload` for `GetCollectPayload` — same interface, different source, everything downstream unchanged. New feature request where we want to always show the highest markup? Just one extra step: `OverwriteHighestMarkup(allow_mu)`.
+Take for example the charge pipeline. It stops before the cleanup phase to keep intermediate fields. Or the collect pipeline swaps `GetLinkPayload` for `GetCollectPayload` – same interface, different source, everything downstream unchanged. New feature request where we want to always show the highest markup? Just one extra step: `OverwriteHighestMarkup(allow_mu)`.
 
 Adding, skipping, or swapping a step is a one-line change to the pipeline declaration. No conditionals buried in a monolith, no duplicated functions.
 
@@ -105,7 +105,7 @@ Business logic didn't change. From the outside, nothing is different.
 
 Business logic stayed the same, but new pipeline variants after the refactor took under an hour with tests. Before, that meant a day of copy-paste-and-tweak and production anxiety.
 
-The pipeline pattern wasn’t novel — it just fit the problem better.
+The pipeline pattern wasn't novel – it just fit the problem better.
 
 Sometimes the best refactor is the one that makes the next ten changes boring.
 
