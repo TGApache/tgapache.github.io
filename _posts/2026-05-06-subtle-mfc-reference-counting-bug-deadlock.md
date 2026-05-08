@@ -43,12 +43,7 @@ happens.
 This matters because of what GDI+ does on shutdown. `GdiplusShutdown` signals
 that background worker thread and then *waits* for it to exit. The MSDN
 documentation is explicit about this – and it includes a warning that's easy to
-miss:
-
-> Do not call GdiplusStartup or GdiplusShutdown in DllMain or in any function
-> that is called by DllMain.
-
-We were effectively doing exactly that.
+miss: _Do not call GdiplusStartup or GdiplusShutdown in DllMain or in any function that is called by DllMain._
 
 ## The Deadlock, Step by Step
 
